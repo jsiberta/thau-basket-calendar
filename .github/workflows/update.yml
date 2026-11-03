@@ -4,6 +4,9 @@ on:
   workflow_dispatch:
   push:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -19,4 +22,10 @@ jobs:
 
       - run: python generate_calendar.py
 
-      - run: ls -la
+      - name: Commit ICS
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add thau_basket.ics
+          git commit -m "Update calendar" || echo "No changes"
+          git push
