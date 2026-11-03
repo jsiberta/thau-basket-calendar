@@ -18,19 +18,33 @@ PDF_URLS = [
     ),
 ]
 
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/131.0 Safari/537.36"
+    ),
+    "Referer": "https://www.basquetcatala.cat/",
+}
+
 tz = pytz.timezone("Europe/Madrid")
 
 cal = Calendar()
 cal.add("prodid", "-//THAU Basket Calendar//")
 cal.add("version", "2.0")
 
-date_re = re.compile(
-    r"(\d{2}-\d{2}-\d{4})\s+(\d{2}:\d{2})"
-)
+date_re = re.compile(r"(\d{2}-\d{2}-\d{4})\s+(\d{2}:\d{2})")
 
 for team_name, url in PDF_URLS:
 
-    response = requests.get(url, timeout=60)
+    print(f"Descarregant {team_name}")
+
+    response = requests.get(
+        url,
+        headers=HEADERS,
+        timeout=60,
+    )
+
     response.raise_for_status()
 
     pdf = PdfReader(BytesIO(response.content))
@@ -41,6 +55,8 @@ for team_name, url in PDF_URLS:
     )
 
     matches = list(date_re.finditer(text))
+
+    print(f"Trobats {len(matches)} partits")
 
     for i, match in enumerate(matches):
 
@@ -67,12 +83,12 @@ for team_name, url in PDF_URLS:
         except Exception:
             continue
 
-        summary = block.split("\n")[0]
+        first_line = block.split("\n")[0]
 
         summary = re.sub(
             r"^\d{2}-\d{2}-\d{4}\s+\d{2}:\d{2}\s*",
             "",
-            summary,
+            first_line,
         ).strip()
 
         location = ""
@@ -80,26 +96,23 @@ for team_name, url in PDF_URLS:
         loc_match = re.search(
             r"Instal·lació:\s*(.*)",
             block,
-            re.DOTALL
+            re.DOTALL,
         )
 
         if loc_match:
-            location = (
-                loc_match.group(1)
-                .split("Categoria")[0]
-                .strip()
-            )
+            location = loc_match.group(1).strip()
 
         event = Event()
 
-        event.add(
-            "summary",
-            summary
-        )
+        event.add("summary", summary)
+        event.add("dtstart", dt)
+        event.add("dtend", dt + timedelta(hours=2))
+        event.add("location", location)
+        event.add("description", team_name)
 
-        event.add(
-            "dtstart",
-            dt
-        )
+        cal.add_component(event)
 
-        event.add
+with open("thau_basket.ics", "wb") as f:
+    f.write(cal.to_ical())
+
+print("Calendari THAU generat correctament")
