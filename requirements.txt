@@ -1,6 +1,4 @@
 requests
-beautifulsoup4
-lxml
 icalendar
-PyYAML
 pytz
+PyPDF2
