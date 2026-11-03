@@ -3,6 +3,8 @@ name: Generate THAU Calendar
 on:
   workflow_dispatch:
   push:
+  schedule:
+    - cron: "0 5 * * *"
 
 permissions:
   contents: write
