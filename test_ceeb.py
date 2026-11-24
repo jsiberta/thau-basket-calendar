@@ -1,4 +1,5 @@
 import requests
+from bs4 import BeautifulSoup
 
 url = "https://www.jeeb.cat/classificacions/fase1/jornadaxml3.php?p2=11047"
 
@@ -7,16 +8,24 @@ response = requests.get(
     headers={"User-Agent": "Mozilla/5.0"}
 )
 
-html = response.text.lower()
-
 print("STATUS:", response.status_code)
 
-print(
-    "THAU LOCAL:",
-    html.count('data-local="escola thau a"')
-)
+soup = BeautifulSoup(response.text, "html.parser")
 
-print(
-    "THAU VISITANT:",
-    html.count('data-visit="escola thau a"')
-)
+cards = soup.find_all("div", class_="card")
+
+for card in cards:
+
+    local = card.get("data-local", "").lower()
+    visit = card.get("data-visit", "").lower()
+
+    if "escola thau a" in local or "escola thau a" in visit:
+
+        print("----- PARTIT TROBAT -----")
+        print("LOCAL:", card.get("data-local"))
+        print("VISITANT:", card.get("data-visit"))
+
+        text = card.get_text(" ", strip=True)
+
+        print(text[:1000])
+        print()
