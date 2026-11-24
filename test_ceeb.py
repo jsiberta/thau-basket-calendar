@@ -11,7 +11,6 @@ response = requests.get(
 
 print("STATUS:", response.status_code)
 
-if "escola thau" in response.text.lower():
-    print("THAU TROBAT")
-else:
-    print("THAU NO TROBAT")
+count = response.text.lower().count("escola thau")
+
+print("PARTITS THAU TROBATS:", count)
