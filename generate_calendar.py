@@ -166,7 +166,7 @@ for card in cards:
 
     event.add(
         "dtend",
-        dt + timedelta(hours=2)
+        dt + timedelta(hours=1)
     )
 
     event.add(
