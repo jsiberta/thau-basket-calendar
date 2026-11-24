@@ -1,4 +1,5 @@
 import requests
+import re
 
 url = "https://www.jeeb.cat/classificacions/fase1/jornadaxml3.php?p2=11047"
 
@@ -11,6 +12,15 @@ response = requests.get(
 
 print("STATUS:", response.status_code)
 
-count = response.text.lower().count("escola thau")
+matches = re.findall(
+    r"Escola Thau",
+    response.text,
+    re.IGNORECASE
+)
 
-print("PARTITS THAU TROBATS:", count)
+print("THAU:", len(matches))
+
+pos = response.text.lower().find("escola thau")
+
+if pos > 0:
+    print(response.text[pos:pos+3000])
